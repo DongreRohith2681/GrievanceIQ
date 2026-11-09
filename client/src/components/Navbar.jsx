@@ -96,7 +96,7 @@ export function Navbar() {
               to="/login"
               className="inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium text-[#172B3A] hover:bg-slate-100 transition-colors border border-transparent"
             >
-              Login
+              LogIn
             </Link>
             <Link
               to="/register"
