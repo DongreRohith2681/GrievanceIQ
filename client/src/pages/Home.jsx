@@ -1,23 +1,28 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import Stats from "@/components/Stats";
+import HowItWorks from "@/components/HowItWorks";
+import Features from "@/components/Features";
+import Categories from "@/components/Categories";
+import CTASection from "@/components/CTASection";
+import Footer from "@/components/Footer";
 
 function Home() {
   return (
-    <>
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Navbar />
 
-      <main>
+      <main className="flex-grow">
         <Hero />
-        
-        {/* Placeholder for How It Works section to support anchor smooth scrolling */}
-        <section id="how-it-works" className="py-24 bg-white border-t border-[#E2E8F0]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold text-[#102C46]">How CivicFix Works</h2>
-            <p className="mt-4 text-[#64748B]">Transparent grievance reporting and AI resolution workflow.</p>
-          </div>
-        </section>
+        <Stats />
+        <HowItWorks />
+        <Features />
+        <Categories />
+        <CTASection />
       </main>
-    </>
+
+      <Footer />
+    </div>
   );
 }
 

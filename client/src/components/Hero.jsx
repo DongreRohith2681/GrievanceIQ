@@ -126,8 +126,8 @@ export function Hero() {
             {/* Decorative back glow */}
             <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500 to-[#102C46] rounded-3xl opacity-25 blur-2xl transform rotate-1 scale-95" />
 
-            {/* Main Mockup Container */}
-            <div className="relative bg-white/95 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl shadow-black/30 overflow-hidden text-slate-900">
+            {/* Main Mockup Container with Gentle Float Animation */}
+            <div className="relative bg-white/95 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl shadow-black/30 overflow-hidden text-slate-900 animate-float">
               
               {/* Dashboard Window Header */}
               <div className="bg-[#102C46] px-4 py-3.5 flex items-center justify-between text-white">
