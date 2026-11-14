@@ -5,7 +5,8 @@ from app.database import get_db
 from app.models.user import User
 from app.schemas.user_schema import UserCreate, UserResponse
 from app.utils.security import hash_password
-
+from app.schemas.user_schema import UserLogin, TokenResponse
+from app.utils.security import verify_password, create_access_token
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
@@ -44,3 +45,44 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     return new_user
+
+
+@router.post("/login", response_model=TokenResponse)
+def login_user(user: UserLogin, db: Session = Depends(get_db)):
+
+    # Find user
+    existing_user = db.query(User).filter(
+        User.email == user.email
+    ).first()
+
+    if not existing_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password"
+        )
+
+    # Verify password
+    if not verify_password(
+        user.password,
+        existing_user.hashed_password
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password"
+        )
+
+    if not existing_user.is_active:
+        raise HTTPException(
+            status_code=403,
+            detail="Account is inactive"
+        )
+
+    # Generate JWT
+    access_token = create_access_token(
+        data={"sub": str(existing_user.id)}
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
