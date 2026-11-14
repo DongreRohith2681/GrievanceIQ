@@ -1,5 +1,5 @@
 from pwdlib import PasswordHash
-
+from fastapi import HTTPException, status
 password_hash = PasswordHash.recommended()
 
 
@@ -36,3 +36,30 @@ def create_access_token(data: dict):
     )
 
     return encoded_jwt
+
+
+def verify_access_token(token: str):
+
+    try:
+        payload = jwt.decode(
+            token,
+            SECRET_KEY,
+            algorithms=[ALGORITHM]
+        )
+
+        user_id = payload.get("sub")
+
+        if user_id is None:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token"
+            )
+
+        return user_id
+
+    except jwt.InvalidTokenError:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
