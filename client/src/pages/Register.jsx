@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
 import {
   User,
   Mail,
@@ -12,8 +13,10 @@ import {
 } from "lucide-react";
 
 import AuthLayout from "../layouts/AuthLayout";
+import API from "../services/api";
 
 function Register() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -28,6 +31,7 @@ function Register() {
   });
 
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -78,7 +82,7 @@ function Register() {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const validationErrors = validateForm();
@@ -88,14 +92,27 @@ function Register() {
       return;
     }
 
-    console.log("Registration data:", {
-      fullName: formData.fullName,
-      email: formData.email,
-      phone: formData.phone,
-      role: formData.role,
-    });
+    setIsSubmitting(true);
 
-    alert("Registration form validated successfully!");
+    try {
+      await API.post("/auth/register", {
+        full_name: formData.fullName.trim(),
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
+        phone: formData.phone ? `+91${formData.phone}` : null,
+      });
+
+      toast.success("Account created successfully. Please sign in.");
+      navigate("/login");
+    } catch (error) {
+      const detail = error.response?.data?.detail;
+      const message = Array.isArray(detail)
+        ? detail.map((item) => item.msg).join(" ")
+        : detail || "Unable to create your account. Please try again.";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const inputClass =
@@ -105,6 +122,14 @@ function Register() {
 
   return (
     <AuthLayout>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: { borderRadius: "12px", fontFamily: "Inter, sans-serif" },
+        }}
+      />
+
       <div className="mb-7">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
           <ShieldCheck size={15} />
@@ -350,10 +375,11 @@ function Register() {
         {/* Submit */}
         <button
           type="submit"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 py-4 font-semibold text-white shadow-lg shadow-emerald-900/10 transition hover:bg-emerald-800 cursor-pointer"
+          disabled={isSubmitting}
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 py-4 font-semibold text-white shadow-lg shadow-emerald-900/10 transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
         >
           <CheckCircle2 size={19} />
-          Create Account
+          {isSubmitting ? "Creating account..." : "Create Account"}
         </button>
 
       </form>

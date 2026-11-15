@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import AuthLayout from "../layouts/AuthLayout";
+import API from "../services/api";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -57,36 +58,33 @@ function Login() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
     if (!validate()) return;
 
-    const loginEndpoint = import.meta.env.VITE_LOGIN_ENDPOINT;
-    if (!loginEndpoint) {
-      toast.error("Email sign-in is not connected to an authentication service yet.");
-      return;
-    }
-
     setIsSubmitting(true);
-    try {
-      const response = await fetch(loginEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          email: formData.email.trim(),
-          password: formData.password,
-          rememberMe: formData.rememberMe,
-        }),
-      });
 
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(result.message || "Unable to sign in. Check your details and try again.");
+    try {
+      const response = await API.post("/auth/login", {
+        email: formData.email.trim(),
+        password: formData.password,
+      });
+      const token = response.data.access_token;
+
+      if (formData.rememberMe) {
+        localStorage.setItem("access_token", token);
+        sessionStorage.removeItem("access_token");
+      } else {
+        sessionStorage.setItem("access_token", token);
+        localStorage.removeItem("access_token");
       }
 
-      toast.success("Signed in successfully.");
-      navigate("/");
+      toast.success("Signed in successfully!");
+      navigate("/citizen/dashboard");
     } catch (error) {
-      toast.error(error.message || "Could not reach the sign-in service.");
+      const message =
+        error.response?.data?.detail ||
+        "Unable to sign in. Check your credentials.";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
